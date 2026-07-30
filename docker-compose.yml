@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: greenpm
+      POSTGRES_PASSWORD: greenpm
+      POSTGRES_DB: greenpm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenpm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://greenpm:greenpm@db:5432/greenpm
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CORS_ORIGINS: '["http://localhost:3000"]'
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  seed:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://greenpm:greenpm@db:5432/greenpm
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    command: python3 seed/generate_seed_data.py
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  pgdata:
