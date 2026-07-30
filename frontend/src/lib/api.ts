@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = typeof window === "undefined"
+  ? (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")
+  : "/api-backend";
 
 export interface ActivitySummary {
   id: string;
@@ -85,17 +87,17 @@ export const api = {
     uploadSchedule: (file: File) => {
       const form = new FormData();
       form.append("file", file);
-      return fetch(`${API_URL}/ingest/schedule`, { method: "POST", body: form }).then(r => r.json());
+      return fetch(`/api-backend/ingest/schedule`, { method: "POST", body: form }).then(r => r.json());
     },
     uploadDocument: (file: File) => {
       const form = new FormData();
       form.append("file", file);
-      return fetch(`${API_URL}/ingest/document`, { method: "POST", body: form }).then(r => r.json());
+      return fetch(`/api-backend/ingest/document`, { method: "POST", body: form }).then(r => r.json());
     },
     uploadBoq: (file: File) => {
       const form = new FormData();
       form.append("file", file);
-      return fetch(`${API_URL}/ingest/boq`, { method: "POST", body: form }).then(r => r.json());
+      return fetch(`/api-backend/ingest/boq`, { method: "POST", body: form }).then(r => r.json());
     },
   },
 
