@@ -41,7 +41,7 @@ export function ChatPanel({ activity, onClose, highlightRef }: ChatPanelProps) {
       if (highlightRef && response.evidence_refs?.length) {
         highlightRef(response.evidence_refs);
       }
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, {
         role: "assistant",
         content: "Green PM AI is temporarily unavailable. Please try again.",
@@ -52,34 +52,31 @@ export function ChatPanel({ activity, onClose, highlightRef }: ChatPanelProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 border-l border-slate-700">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-800/50">
+    <div className="flex flex-col h-full bg-white border-l border-slate-200">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full bg-gpm-green/20 border border-gpm-green/40 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-gpm-green/10 border border-gpm-green/30 flex items-center justify-center">
             <span className="text-gpm-green text-xs font-bold">G</span>
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">Green PM AI</p>
+            <p className="text-sm font-semibold text-slate-900">Green PM AI</p>
             <p className="text-xs text-slate-500 truncate max-w-[180px]">{activity.name}</p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="text-slate-500 hover:text-slate-300 text-lg leading-none"
+          className="text-slate-400 hover:text-slate-700 text-lg leading-none"
         >
           ✕
         </button>
       </div>
 
-      {/* Scope notice */}
-      <div className="px-4 py-2 bg-slate-800/30 border-b border-slate-700/50">
+      <div className="px-4 py-2 bg-slate-50 border-b border-slate-100">
         <p className="text-xs text-slate-500">
           Focused on this activity only. For project-wide questions, use the dashboard.
         </p>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && (
           <div className="space-y-3">
@@ -88,8 +85,8 @@ export function ChatPanel({ activity, onClose, highlightRef }: ChatPanelProps) {
               <button
                 key={q}
                 onClick={() => send(q)}
-                className="w-full text-left text-sm text-slate-300 bg-slate-800 hover:bg-slate-750
-                           border border-slate-700 hover:border-slate-600 rounded-lg px-3 py-2.5
+                className="w-full text-left text-sm text-slate-700 bg-slate-50 hover:bg-slate-100
+                           border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-2.5
                            transition-colors"
               >
                 {q}
@@ -102,11 +99,11 @@ export function ChatPanel({ activity, onClose, highlightRef }: ChatPanelProps) {
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-lg px-3 py-2.5 text-sm leading-relaxed ${
               msg.role === "user"
-                ? "bg-gpm-green/20 text-white border border-gpm-green/30"
-                : "bg-slate-800 text-slate-200 border border-slate-700"
+                ? "bg-gpm-green/10 text-slate-900 border border-gpm-green/20"
+                : "bg-slate-50 text-slate-700 border border-slate-200"
             }`}>
               {msg.role === "assistant" && (
-                <p className="text-xs text-slate-500 mb-1 font-medium">Green PM AI</p>
+                <p className="text-xs text-slate-400 mb-1 font-medium">Green PM AI</p>
               )}
               <p className="whitespace-pre-wrap">{msg.content}</p>
             </div>
@@ -115,12 +112,12 @@ export function ChatPanel({ activity, onClose, highlightRef }: ChatPanelProps) {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5">
-              <p className="text-xs text-slate-500 mb-1">Green PM AI</p>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+              <p className="text-xs text-slate-400 mb-1">Green PM AI</p>
               <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce [animation-delay:0ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce [animation-delay:300ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:300ms]" />
               </div>
             </div>
           </div>
@@ -129,8 +126,7 @@ export function ChatPanel({ activity, onClose, highlightRef }: ChatPanelProps) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 border-t border-slate-700 bg-slate-800/30">
+      <div className="px-4 py-3 border-t border-slate-200 bg-slate-50">
         <div className="flex gap-2">
           <input
             type="text"
@@ -138,15 +134,15 @@ export function ChatPanel({ activity, onClose, highlightRef }: ChatPanelProps) {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && !e.shiftKey && send(input)}
             placeholder="Ask about evidence or confidence..."
-            className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm
-                       text-white placeholder-slate-500 focus:outline-none focus:border-gpm-green/50
+            className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm
+                       text-slate-900 placeholder-slate-400 focus:outline-none focus:border-gpm-green/50
                        focus:ring-1 focus:ring-gpm-green/20"
             disabled={loading}
           />
           <button
             onClick={() => send(input)}
             disabled={loading || !input.trim()}
-            className="px-3 py-2 bg-gpm-green/20 hover:bg-gpm-green/30 border border-gpm-green/40
+            className="px-3 py-2 bg-gpm-green/10 hover:bg-gpm-green/20 border border-gpm-green/30
                        text-gpm-green rounded-lg text-sm font-medium transition-colors
                        disabled:opacity-40 disabled:cursor-not-allowed"
           >

@@ -68,10 +68,9 @@ export default function ReportsPage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Weekly Report</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Weekly Report</h1>
           <p className="text-slate-500 text-sm mt-1">
             Green PM AI drafts from current project evidence — you review, edit, and confirm before sending.
           </p>
@@ -79,8 +78,8 @@ export default function ReportsPage() {
         <button
           onClick={handleDraft}
           disabled={drafting}
-          className="flex items-center gap-2 px-4 py-2 bg-gpm-green/20 hover:bg-gpm-green/30
-                     border border-gpm-green/40 text-gpm-green rounded-lg text-sm font-medium
+          className="flex items-center gap-2 px-4 py-2 bg-gpm-green/10 hover:bg-gpm-green/20
+                     border border-gpm-green/30 text-gpm-green rounded-lg text-sm font-medium
                      transition-colors disabled:opacity-50"
         >
           {drafting ? "Drafting..." : "Generate New Draft"}
@@ -90,45 +89,44 @@ export default function ReportsPage() {
       {loading && <p className="text-slate-500 text-sm py-8 text-center">Loading...</p>}
 
       {!loading && !report && (
-        <div className="text-center py-16 border-2 border-dashed border-slate-800 rounded-xl">
+        <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-xl">
           <p className="text-slate-500 text-sm">No reports yet.</p>
-          <p className="text-slate-600 text-xs mt-1">Click &quot;Generate New Draft&quot; to create one from current project evidence.</p>
+          <p className="text-slate-400 text-xs mt-1">Click &quot;Generate New Draft&quot; to create one from current project evidence.</p>
         </div>
       )}
 
       {!loading && report && (
         <div className="space-y-4">
-          {/* Metadata bar */}
-          <div className="flex items-center justify-between px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-800">
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-lg bg-white border border-slate-200">
             <div className="flex items-center gap-4 text-xs text-slate-500">
               <span>Generated: {new Date(report.created_at).toLocaleString()}</span>
               {report.confirmed_at && (
-                <span className="text-emerald-400">Sent (logged): {new Date(report.confirmed_at).toLocaleString()}</span>
+                <span className="text-emerald-600">Sent (logged): {new Date(report.confirmed_at).toLocaleString()}</span>
               )}
-              {edited && <span className="text-amber-400">Unsaved changes</span>}
+              {edited && <span className="text-amber-600">Unsaved changes</span>}
             </div>
             <div className="flex gap-2">
               {edited && (
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 border border-slate-600
-                             text-slate-300 rounded-lg transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 border border-slate-200
+                             text-slate-700 rounded-lg transition-colors disabled:opacity-50"
                 >
                   {saving ? "Saving..." : "Save Edits"}
                 </button>
               )}
               {sendDone ? (
-                <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-emerald-400
-                                 bg-emerald-950/40 border border-emerald-700/40 rounded-lg">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-emerald-600
+                                 bg-emerald-50 border border-emerald-200 rounded-lg">
                   <span>✓</span> Send action logged
                 </span>
               ) : (
                 <button
                   onClick={handleSend}
                   disabled={sending}
-                  className="px-3 py-1.5 text-xs font-medium bg-gpm-green/20 hover:bg-gpm-green/30
-                             border border-gpm-green/40 text-gpm-green rounded-lg
+                  className="px-3 py-1.5 text-xs font-medium bg-gpm-green/10 hover:bg-gpm-green/20
+                             border border-gpm-green/30 text-gpm-green rounded-lg
                              transition-colors disabled:opacity-50"
                 >
                   {sending ? "Logging..." : "Send →"}
@@ -137,32 +135,29 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Send notice */}
-          <div className="px-4 py-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-600">
+          <div className="px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-700">
             ⚠ &quot;Send&quot; logs the action and records your confirmation. No email is sent in this version — all outbound communication is your responsibility.
           </div>
 
-          {/* Report editor */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-            <div className="px-4 py-2.5 border-b border-slate-800 bg-slate-800/30 flex items-center justify-between">
+          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+            <div className="px-4 py-2.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
               <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Report Draft (editable)</span>
               {report.edited_content && !edited && (
-                <span className="text-xs text-slate-600">Showing your edited version</span>
+                <span className="text-xs text-slate-400">Showing your edited version</span>
               )}
             </div>
             <textarea
               value={content}
               onChange={e => { setContent(e.target.value); setEdited(true); }}
-              className="w-full h-[600px] bg-transparent p-5 text-sm text-slate-300 font-mono leading-relaxed
+              className="w-full h-[600px] bg-transparent p-5 text-sm text-slate-700 font-mono leading-relaxed
                          resize-none focus:outline-none"
               spellCheck={false}
             />
           </div>
 
-          {/* Report history */}
           {reports.length > 1 && (
             <div className="mt-6">
-              <h2 className="text-xs text-slate-600 uppercase tracking-wide mb-2">Previous Reports</h2>
+              <h2 className="text-xs text-slate-500 uppercase tracking-wide mb-2">Previous Reports</h2>
               <div className="space-y-1">
                 {reports.slice(1).map(r => (
                   <button
@@ -175,8 +170,8 @@ export default function ReportsPage() {
                     }}
                     className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors
                                 ${report.id === r.id
-                      ? "bg-slate-800 text-slate-300"
-                      : "text-slate-500 hover:text-slate-300 hover:bg-slate-800/50"
+                      ? "bg-slate-100 text-slate-700"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                     }`}
                   >
                     {new Date(r.created_at).toLocaleString()}

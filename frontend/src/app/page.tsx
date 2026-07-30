@@ -6,12 +6,12 @@ import { api, type ActivitySummary } from "@/lib/api";
 import { ScoreBadges, DivergenceBadge } from "@/components/ScoreBadges";
 
 const DISCIPLINE_COLORS: Record<string, string> = {
-  Civil:          "bg-stone-800 text-stone-300 border-stone-700",
-  Mechanical:     "bg-blue-900/50 text-blue-300 border-blue-700/50",
-  Piping:         "bg-cyan-900/50 text-cyan-300 border-cyan-700/50",
-  Electrical:     "bg-yellow-900/50 text-yellow-300 border-yellow-700/50",
-  "I&C":          "bg-purple-900/50 text-purple-300 border-purple-700/50",
-  Commissioning:  "bg-rose-900/50 text-rose-300 border-rose-700/50",
+  Civil:          "bg-stone-100 text-stone-700 border-stone-300",
+  Mechanical:     "bg-blue-50 text-blue-700 border-blue-200",
+  Piping:         "bg-cyan-50 text-cyan-700 border-cyan-200",
+  Electrical:     "bg-yellow-50 text-yellow-700 border-yellow-200",
+  "I&C":          "bg-purple-50 text-purple-700 border-purple-200",
+  Commissioning:  "bg-rose-50 text-rose-700 border-rose-200",
 };
 
 export default function DashboardPage() {
@@ -62,10 +62,9 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto">
-      {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Project Progress</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Project Progress</h1>
           <p className="text-slate-500 text-sm mt-1">
             Evidence-backed status sourced from your schedule and project documents
           </p>
@@ -73,41 +72,39 @@ export default function DashboardPage() {
         <button
           onClick={handleRecompute}
           disabled={recomputing}
-          className="flex items-center gap-2 px-3 py-2 text-sm bg-slate-800 hover:bg-slate-700
-                     border border-slate-700 rounded-lg text-slate-300 transition-colors
+          className="flex items-center gap-2 px-3 py-2 text-sm bg-white hover:bg-slate-50
+                     border border-slate-200 rounded-lg text-slate-600 transition-colors
                      disabled:opacity-50"
         >
           {recomputing ? "Recomputing..." : "↻ Recompute Scores"}
         </button>
       </div>
 
-      {/* Summary chips */}
       {!loading && (
         <div className="flex flex-wrap gap-3 mb-6">
           <SummaryChip
             label="Total Activities"
             value={activities.length}
-            color="text-slate-300 bg-slate-800 border-slate-700"
+            color="text-slate-700 bg-white border-slate-200"
           />
           <SummaryChip
             label="Verification Required"
             value={verificationCount}
-            color={verificationCount > 0 ? "text-red-300 bg-red-950/40 border-red-700/50" : "text-slate-400 bg-slate-800 border-slate-700"}
+            color={verificationCount > 0 ? "text-red-600 bg-red-50 border-red-200" : "text-slate-500 bg-white border-slate-200"}
           />
           <SummaryChip
             label="Low Confidence (<50%)"
             value={lowConfCount}
-            color={lowConfCount > 0 ? "text-amber-300 bg-amber-950/40 border-amber-700/50" : "text-slate-400 bg-slate-800 border-slate-700"}
+            color={lowConfCount > 0 ? "text-amber-700 bg-amber-50 border-amber-200" : "text-slate-500 bg-white border-slate-200"}
           />
           <SummaryChip
             label="Evidence/Confidence Divergence"
             value={divergentCount}
-            color={divergentCount > 0 ? "text-sky-300 bg-sky-950/40 border-sky-700/50" : "text-slate-400 bg-slate-800 border-slate-700"}
+            color={divergentCount > 0 ? "text-sky-700 bg-sky-50 border-sky-200" : "text-slate-500 bg-white border-slate-200"}
           />
         </div>
       )}
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-5">
         <FilterSelect
           label="Discipline"
@@ -127,12 +124,11 @@ export default function DashboardPage() {
         <div className="text-slate-500 text-sm py-12 text-center">Loading activities...</div>
       )}
       {error && (
-        <div className="text-red-400 text-sm py-4 bg-red-950/20 border border-red-700/30 rounded-lg px-4">
+        <div className="text-red-600 text-sm py-4 bg-red-50 border border-red-200 rounded-lg px-4">
           {error}
         </div>
       )}
 
-      {/* Activity grid */}
       {!loading && !error && (
         <div className="grid gap-3">
           {filtered.map(activity => (
@@ -165,8 +161,8 @@ function FilterSelect({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="text-sm bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5
-                   text-slate-300 focus:outline-none focus:border-slate-600"
+        className="text-sm bg-white border border-slate-200 rounded-lg px-2.5 py-1.5
+                   text-slate-700 focus:outline-none focus:border-slate-400"
       >
         {options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
@@ -175,20 +171,19 @@ function FilterSelect({
 }
 
 function ActivityRow({ activity }: { activity: ActivitySummary }) {
-  const disciplineColor = DISCIPLINE_COLORS[activity.discipline ?? ""] ?? "bg-slate-800 text-slate-400 border-slate-700";
+  const disciplineColor = DISCIPLINE_COLORS[activity.discipline ?? ""] ?? "bg-slate-100 text-slate-600 border-slate-200";
 
   return (
     <Link
       href={`/activities/${activity.id}`}
-      className="block rounded-xl border border-slate-800 bg-slate-900 hover:border-slate-700
-                 hover:bg-slate-800/50 transition-all p-4 group"
+      className="block rounded-xl border border-slate-200 bg-white hover:border-slate-300
+                 hover:bg-slate-50 transition-all p-4 group"
     >
       <div className="flex items-start gap-4">
-        {/* WBS + Name */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             {activity.wbs_ref && (
-              <span className="font-mono text-xs text-slate-600">{activity.wbs_ref}</span>
+              <span className="font-mono text-xs text-slate-400">{activity.wbs_ref}</span>
             )}
             {activity.discipline && (
               <span className={`text-xs px-2 py-0.5 rounded border ${disciplineColor}`}>
@@ -196,28 +191,26 @@ function ActivityRow({ activity }: { activity: ActivitySummary }) {
               </span>
             )}
             {activity.verification_required && (
-              <span className="flex items-center gap-1 text-xs text-red-400 bg-red-950/50 border border-red-700/50 px-2 py-0.5 rounded font-medium">
+              <span className="flex items-center gap-1 text-xs text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded font-medium">
                 <span>⚡</span> Verification Required
               </span>
             )}
           </div>
-          <p className="text-white font-medium text-sm group-hover:text-gpm-green transition-colors">
+          <p className="text-slate-900 font-medium text-sm group-hover:text-gpm-green transition-colors">
             {activity.name}
           </p>
           {activity.missing_evidence && (
-            <p className="text-amber-400/70 text-xs mt-1.5 truncate">
+            <p className="text-amber-600 text-xs mt-1.5 truncate">
               Missing: {activity.missing_evidence}
             </p>
           )}
         </div>
 
-        {/* Progress % */}
         <div className="text-right shrink-0">
-          <div className="text-lg font-bold text-white">{Math.round(activity.reported_progress)}%</div>
+          <div className="text-lg font-bold text-slate-900">{Math.round(activity.reported_progress)}%</div>
           <div className="text-xs text-slate-500">Reported</div>
         </div>
 
-        {/* Score badges */}
         <div className="shrink-0 w-56">
           <ScoreBadges
             evidenceScore={activity.evidence_score}

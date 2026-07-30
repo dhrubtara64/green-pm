@@ -12,17 +12,17 @@ function ScoreBar({ value, label, colorClass, tooltip }: ScoreBarProps) {
   return (
     <div className="group relative">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">{label}</span>
-        <span className="text-sm font-bold text-white">{pct}%</span>
+        <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</span>
+        <span className="text-sm font-bold text-slate-900">{pct}%</span>
       </div>
-      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+      <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-300 ${colorClass}`}
           style={{ width: `${pct}%` }}
         />
       </div>
       <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-10
-                      bg-slate-900 border border-slate-600 rounded px-3 py-2 text-xs text-slate-300
+                      bg-white border border-slate-200 rounded px-3 py-2 text-xs text-slate-700
                       whitespace-nowrap shadow-lg max-w-xs">
         {tooltip}
       </div>
@@ -56,14 +56,14 @@ export function ScoreBadges({ evidenceScore, confidenceScore, compact = false }:
         <div className="flex flex-col items-center gap-1">
           <span className="text-[10px] text-slate-500 uppercase tracking-wider">Evidence</span>
           <span className={`text-sm font-bold px-2 py-0.5 rounded ${
-            evidenceScore >= 0.65 ? "text-emerald-400" : evidenceScore >= 0.35 ? "text-amber-400" : "text-red-400"
+            evidenceScore >= 0.65 ? "text-emerald-600" : evidenceScore >= 0.35 ? "text-amber-600" : "text-red-600"
           }`}>{evPct}%</span>
         </div>
-        <div className="w-px h-8 bg-slate-700" />
+        <div className="w-px h-8 bg-slate-200" />
         <div className="flex flex-col items-center gap-1">
           <span className="text-[10px] text-slate-500 uppercase tracking-wider">Confidence</span>
           <span className={`text-sm font-bold px-2 py-0.5 rounded ${
-            confidenceScore >= 0.65 ? "text-sky-400" : confidenceScore >= 0.35 ? "text-amber-400" : "text-orange-400"
+            confidenceScore >= 0.65 ? "text-sky-600" : confidenceScore >= 0.35 ? "text-amber-600" : "text-orange-600"
           }`}>{confPct}%</span>
         </div>
       </div>
@@ -94,9 +94,9 @@ export function DivergenceBadge({ evidenceScore, confidenceScore }: { evidenceSc
 
   const isLowConf = confidenceScore < evidenceScore;
   return (
-    <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-amber-950/50 border border-amber-700/50">
-      <span className="text-amber-400 text-xs">⚠</span>
-      <span className="text-amber-300 text-xs font-medium">
+    <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-amber-50 border border-amber-200">
+      <span className="text-amber-500 text-xs">⚠</span>
+      <span className="text-amber-700 text-xs font-medium">
         {isLowConf
           ? "Evidence strong — source reliability concern"
           : "Confident despite thin evidence — investigate why"}
