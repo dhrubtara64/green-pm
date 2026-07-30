@@ -9,6 +9,7 @@ from app.agents.orchestrator import answer_activity_question
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
+@router.post("", response_model=ChatResponse)
 @router.post("/", response_model=ChatResponse)
 def chat(req: ChatRequest, db: Session = Depends(get_db)):
     """

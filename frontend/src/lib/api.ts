@@ -65,7 +65,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   activities: {
-    list: () => request<ActivitySummary[]>("/activities/"),
+    list: () => request<ActivitySummary[]>("/activities"),
     get: (id: string) => request<ActivityDetail>(`/activities/${id}`),
     confirm: (id: string, fieldName: string, currentValue: string) =>
       request(`/activities/${id}/confirm`, {
@@ -102,7 +102,7 @@ export const api = {
   },
 
   reports: {
-    list: () => request<Report[]>("/reports/"),
+    list: () => request<Report[]>("/reports"),
     draft: () => request<Report>("/reports/draft", { method: "POST" }),
     get: (id: string) => request<Report>(`/reports/${id}`),
     edit: (id: string, content: string) =>
@@ -116,7 +116,7 @@ export const api = {
 
   chat: {
     send: (activityId: string, message: string, history: ChatMessage[]) =>
-      request<ChatResponse>("/chat/", {
+      request<ChatResponse>("/chat", {
         method: "POST",
         body: JSON.stringify({ activity_id: activityId, message, history }),
       }),

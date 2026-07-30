@@ -5,7 +5,7 @@ const BACKEND = process.env.BACKEND_URL || "http://localhost:8000";
 type Ctx = { params: { path: string[] } };
 
 async function proxy(req: NextRequest, { params }: Ctx, method: string) {
-  const path = params.path.join("/");
+  const path = params.path.join("/").replace(/\/+$/, "");
   const search = req.nextUrl.search;
   const url = `${BACKEND}/${path}${search}`;
 

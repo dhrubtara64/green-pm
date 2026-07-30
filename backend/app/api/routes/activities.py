@@ -11,6 +11,7 @@ from app.agents.confidence_agent import recompute_activity_scores
 router = APIRouter(prefix="/activities", tags=["activities"])
 
 
+@router.get("", response_model=list[ActivitySummary])
 @router.get("/", response_model=list[ActivitySummary])
 def list_activities(db: Session = Depends(get_db)):
     return db.query(Activity).order_by(Activity.wbs_ref, Activity.name).all()

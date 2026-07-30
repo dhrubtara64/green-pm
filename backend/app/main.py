@@ -9,6 +9,7 @@ app = FastAPI(
     title="Green PM API",
     description="Engineering Project Intelligence Platform — Evidence-backed progress scoring for EPC projects.",
     version="1.0.0-demo",
+    redirect_slashes=False,
 )
 
 app.add_middleware(

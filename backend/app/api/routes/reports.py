@@ -12,6 +12,7 @@ from app.agents.communication_agent import draft_weekly_report
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 
+@router.get("", response_model=list[ReportOut])
 @router.get("/", response_model=list[ReportOut])
 def list_reports(db: Session = Depends(get_db)):
     return db.query(WeeklyReport).order_by(WeeklyReport.created_at.desc()).limit(10).all()
