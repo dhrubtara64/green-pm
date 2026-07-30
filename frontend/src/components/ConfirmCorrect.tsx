@@ -27,18 +27,26 @@ export function ConfirmCorrect({
 
   async function handleConfirm() {
     setMode("loading");
-    await api.activities.confirm(activityId, fieldName, currentValue);
-    setConfirmed(true);
-    setMode("done");
-    onUpdated();
+    try {
+      await api.activities.confirm(activityId, fieldName, currentValue);
+      setConfirmed(true);
+      setMode("done");
+      onUpdated();
+    } catch {
+      setMode("idle");
+    }
   }
 
   async function handleCorrect() {
     if (!newValue.trim()) return;
     setMode("loading");
-    await api.activities.correct(activityId, fieldName, currentValue, newValue, rationale || undefined);
-    setMode("done");
-    onUpdated();
+    try {
+      await api.activities.correct(activityId, fieldName, currentValue, newValue, rationale || undefined);
+      setMode("done");
+      onUpdated();
+    } catch {
+      setMode("correcting");
+    }
   }
 
   if (mode === "done") {

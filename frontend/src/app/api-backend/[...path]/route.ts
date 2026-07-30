@@ -7,7 +7,7 @@ type Ctx = { params: { path: string[] } };
 async function proxy(req: NextRequest, { params }: Ctx, method: string) {
   const path = params.path.join("/");
   const search = req.nextUrl.search;
-  const url = `${BACKEND}/${path}/${search}`;
+  const url = `${BACKEND}/${path}${search}`;
 
   const headers: Record<string, string> = {};
   const ct = req.headers.get("content-type");
