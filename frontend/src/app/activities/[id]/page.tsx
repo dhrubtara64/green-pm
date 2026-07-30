@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, type ActivityDetail } from "@/lib/api";
 import { ScoreBadges, DivergenceBadge } from "@/components/ScoreBadges";
@@ -8,8 +8,8 @@ import { EvidenceTrail } from "@/components/EvidenceTrail";
 import { ConfirmCorrect } from "@/components/ConfirmCorrect";
 import { ChatPanel } from "@/components/ChatPanel";
 
-export default function ActivityPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ActivityPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const [activity, setActivity] = useState<ActivityDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
