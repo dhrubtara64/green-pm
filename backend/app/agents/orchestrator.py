@@ -114,7 +114,7 @@ Evidence items ({len(evidence_items)} total):
 
     try:
         import anthropic
-        client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+        client = anthropic.Anthropic(api_key=settings.anthropic_api_key, timeout=30.0)
         response = client.messages.create(
             model=settings.anthropic_model,
             max_tokens=1024,
