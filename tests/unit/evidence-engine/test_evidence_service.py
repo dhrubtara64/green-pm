@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 import app.evidence.service as _svc
+from app.ai_clients.embedding import EmbeddingResult, StubEmbeddingClient
 from app.ai_clients.ocr import OCRResult, StubOCRClient
 from app.ai_clients.speech import (
     StubSpeechClient,
@@ -21,6 +22,7 @@ from app.evidence.schemas import EvidenceCreate, EvidenceUpdate
 from app.evidence.service import (
     EvidenceNotFoundError,
     create_evidence,
+    generate_and_store_embedding,
     get_evidence,
     list_evidence,
     process_ocr,
@@ -85,11 +87,19 @@ def _make_evidence(**kwargs):
 # create_evidence
 # ──────────────────────────────────────────────────────────────────────────────
 
+def _create_evidence_patches():
+    return (
+        patch.object(_svc, "write_outbox_event", new=AsyncMock()),
+        patch.object(_svc, "sync_evidence_node", new=AsyncMock(return_value=MagicMock())),
+    )
+
+
 class TestCreateEvidence:
     @pytest.mark.asyncio
     async def test_adds_evidence_to_session(self):
         session = _make_session()
-        with patch.object(_svc, "write_outbox_event", new=AsyncMock()):
+        with patch.object(_svc, "write_outbox_event", new=AsyncMock()), \
+             patch.object(_svc, "sync_evidence_node", new=AsyncMock(return_value=MagicMock())):
             await create_evidence(session, _TENANT, _USER, _make_create())
         assert session.add.called
 
@@ -102,7 +112,8 @@ class TestCreateEvidence:
             added["obj"] = obj
 
         session.add = capture_add
-        with patch.object(_svc, "write_outbox_event", new=AsyncMock()):
+        with patch.object(_svc, "write_outbox_event", new=AsyncMock()), \
+             patch.object(_svc, "sync_evidence_node", new=AsyncMock(return_value=MagicMock())):
             await create_evidence(session, _TENANT, _USER, _make_create())
         assert added["obj"].status == "submitted"
 
@@ -110,7 +121,8 @@ class TestCreateEvidence:
     async def test_outbox_event_written(self):
         session = _make_session()
         mock_outbox = AsyncMock()
-        with patch.object(_svc, "write_outbox_event", new=mock_outbox):
+        with patch.object(_svc, "write_outbox_event", new=mock_outbox), \
+             patch.object(_svc, "sync_evidence_node", new=AsyncMock(return_value=MagicMock())):
             await create_evidence(session, _TENANT, _USER, _make_create())
         mock_outbox.assert_called_once()
         assert mock_outbox.call_args.kwargs["event_type"] == "EvidenceSubmitted"
@@ -119,16 +131,27 @@ class TestCreateEvidence:
     async def test_outbox_topic_is_evidence(self):
         session = _make_session()
         mock_outbox = AsyncMock()
-        with patch.object(_svc, "write_outbox_event", new=mock_outbox):
+        with patch.object(_svc, "write_outbox_event", new=mock_outbox), \
+             patch.object(_svc, "sync_evidence_node", new=AsyncMock(return_value=MagicMock())):
             await create_evidence(session, _TENANT, _USER, _make_create())
         assert mock_outbox.call_args.kwargs["topic"] == "greenpm.evidence"
 
     @pytest.mark.asyncio
     async def test_flush_called(self):
         session = _make_session()
-        with patch.object(_svc, "write_outbox_event", new=AsyncMock()):
+        with patch.object(_svc, "write_outbox_event", new=AsyncMock()), \
+             patch.object(_svc, "sync_evidence_node", new=AsyncMock(return_value=MagicMock())):
             await create_evidence(session, _TENANT, _USER, _make_create())
         assert session.flush.called
+
+    @pytest.mark.asyncio
+    async def test_pig_node_synced(self):
+        session = _make_session()
+        mock_sync = AsyncMock(return_value=MagicMock())
+        with patch.object(_svc, "write_outbox_event", new=AsyncMock()), \
+             patch.object(_svc, "sync_evidence_node", new=mock_sync):
+            await create_evidence(session, _TENANT, _USER, _make_create())
+        mock_sync.assert_called_once()
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -345,3 +368,48 @@ class TestProcessOCR:
         ev = _make_evidence(capture_type="financial_document", evidence_metadata={})
         await process_ocr(session, ev, StubOCRClient())
         assert "ocr_page_count" in ev.evidence_metadata
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# generate_and_store_embedding (S4-02)
+# ──────────────────────────────────────────────────────────────────────────────
+
+class TestGenerateAndStoreEmbedding:
+    @pytest.mark.asyncio
+    async def test_embedding_stored_in_metadata(self):
+        session = _make_session()
+        ev = _make_evidence(entity_type="activity", capture_type="site_photo",
+                            description="Site visit", evidence_metadata={})
+        await generate_and_store_embedding(session, ev, StubEmbeddingClient())
+        assert "embedding" in ev.evidence_metadata
+        assert len(ev.evidence_metadata["embedding"]) > 0
+
+    @pytest.mark.asyncio
+    async def test_embedding_model_stored(self):
+        session = _make_session()
+        ev = _make_evidence(description="test", evidence_metadata={})
+        await generate_and_store_embedding(session, ev, StubEmbeddingClient())
+        assert "embedding_model" in ev.evidence_metadata
+        assert ev.evidence_metadata["embedding_model"] == "stub"
+
+    @pytest.mark.asyncio
+    async def test_flush_called_on_success(self):
+        session = _make_session()
+        ev = _make_evidence(description="test", evidence_metadata={})
+        await generate_and_store_embedding(session, ev, StubEmbeddingClient())
+        assert session.flush.called
+
+    @pytest.mark.asyncio
+    async def test_no_update_when_embedding_fails(self):
+        session = _make_session()
+        ev = _make_evidence(description="test", evidence_metadata={})
+        bad = EmbeddingResult(error_message="quota exceeded")
+        await generate_and_store_embedding(session, ev, StubEmbeddingClient(result=bad))
+        assert "embedding" not in ev.evidence_metadata
+
+    @pytest.mark.asyncio
+    async def test_existing_metadata_preserved(self):
+        session = _make_session()
+        ev = _make_evidence(description="desc", evidence_metadata={"existing_key": "value"})
+        await generate_and_store_embedding(session, ev, StubEmbeddingClient())
+        assert ev.evidence_metadata.get("existing_key") == "value"

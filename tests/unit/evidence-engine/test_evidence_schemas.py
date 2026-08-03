@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
+from unittest.mock import MagicMock
 
 import pytest
 from pydantic import ValidationError
@@ -286,3 +287,19 @@ class TestEvidenceResponse:
 
     def test_from_attributes_config(self):
         assert EvidenceResponse.model_config.get("from_attributes") is True
+
+    def test_metadata_via_evidence_metadata_alias(self):
+        # Router uses model_validate(orm_obj) where ORM attr is evidence_metadata
+        mock_orm = MagicMock()
+        for k, v in self._base().items():
+            if k == "metadata":
+                setattr(mock_orm, "evidence_metadata", v)
+            else:
+                setattr(mock_orm, k, v)
+        r = EvidenceResponse.model_validate(mock_orm)
+        assert r.metadata == {}
+
+    def test_populate_by_name_allows_metadata_key(self):
+        # Dict-based construction with field name (not alias) should work
+        r = EvidenceResponse(**self._base())
+        assert r.metadata == {}

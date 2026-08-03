@@ -142,11 +142,12 @@ class EvidenceResponse(BaseModel):
     gcp_bucket: Optional[str]
     gcp_object: Optional[str]
     reliability_tier: str
-    metadata: dict[str, Any]
+    # ORM attr is evidence_metadata (SQLAlchemy reserves 'metadata'); alias maps both
+    metadata: dict[str, Any] = Field(validation_alias="evidence_metadata")
     created_at: datetime
     updated_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True, "populate_by_name": True}
 
 
 class EvidenceScoreResponse(BaseModel):

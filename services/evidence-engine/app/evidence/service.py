@@ -11,9 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.outbox.writer import write_outbox_event
 
+from ..ai_clients.embedding import EmbeddingClient
 from ..ai_clients.ocr import OCRClient
 from ..ai_clients.speech import SpeechClient, TRANSCRIPTION_IN_PROGRESS, TRANSCRIPTION_COMPLETE, TRANSCRIPTION_FAILED
 from ..ai_clients.vision import VisionClient
+from ..pig.edge_writer import sync_evidence_node
 from ..scoring.formula import ComputedScore, EvidenceItem, compute_evidence_score
 from .model import Evidence, EvidenceScore
 from .schemas import EvidenceCreate, EvidenceUpdate
@@ -69,7 +71,36 @@ async def create_evidence(
             "capture_type": data.capture_type,
         },
     )
+
+    # Register evidence as a PIG node in the same transaction — S4-03
+    await sync_evidence_node(session, evidence)
+
     return evidence
+
+
+async def generate_and_store_embedding(
+    session: AsyncSession,
+    evidence: Evidence,
+    client: EmbeddingClient,
+) -> None:
+    """Generate a text embedding for the evidence and store it in evidence_metadata.
+
+    Called after ingestion (S4-02). Does NOT commit — caller owns transaction.
+    """
+    text_parts = [
+        evidence.entity_type,
+        evidence.capture_type,
+        evidence.description or "",
+    ]
+    text = " ".join(p for p in text_parts if p).strip()
+    result = await client.generate_embedding(text)
+    if result.succeeded:
+        evidence.evidence_metadata = {
+            **evidence.evidence_metadata,
+            "embedding": list(result.embedding),
+            "embedding_model": result.model,
+        }
+        await session.flush()
 
 
 async def get_evidence(
