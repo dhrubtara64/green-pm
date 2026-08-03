@@ -13,10 +13,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-import sys, pathlib
-sys.path.insert(0, str(pathlib.Path(__file__).parents[3] / "services" / "api-gateway"))
-
-from app.auth.jwt import AuthSettings, create_access_token
+from app.auth.jwt import AuthSettings, TokenClaims, create_access_token
 from app.auth.dependencies import CurrentUser, get_current_user, require_role
 
 SETTINGS = AuthSettings(secret_key="test-secret-dep")
@@ -108,7 +105,6 @@ async def test_require_role_exact_match_passes():
 # ── CurrentUser.has_role ──────────────────────────────────────────────────────
 
 def _make_user(role: str) -> CurrentUser:
-    from app.auth.jwt import TokenClaims
     from datetime import datetime, timezone
     claims = TokenClaims(
         sub=str(USER_ID),
