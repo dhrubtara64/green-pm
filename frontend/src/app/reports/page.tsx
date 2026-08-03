@@ -31,13 +31,12 @@ export default function ReportsPage() {
   async function handleDraft() {
     setDrafting(true);
     try {
-      const r = await api.reports.draft();
-      setReport(r);
-      setContent(r.draft_content);
-      setEdited(false);
-      setSendDone(false);
+      await api.reports.draft();
     } finally {
       setDrafting(false);
+      setEdited(false);
+      setSendDone(false);
+      await load();
     }
   }
 

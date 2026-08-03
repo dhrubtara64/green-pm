@@ -7,12 +7,39 @@ export interface ActivitySummary {
   name: string;
   wbs_ref: string | null;
   discipline: string | null;
+  subcontractor: string | null;
   reported_progress: number;
   evidence_score: number;
   confidence_score: number;
   missing_evidence: string | null;
   verification_required: boolean;
   updated_at: string | null;
+}
+
+export interface ChangeItem {
+  id: string;
+  type: string;
+  description: string;
+  status: string;
+  days_open: number;
+  value: string | null;
+  value_label: string;
+  affected_activity_id: string | null;
+  affected_activity_name: string | null;
+  ai_flag: string | null;
+  ai_flag_level: string | null;
+  root_cause: string | null;
+  cost_impact: string | null;
+  timeline: { date: string; event: string }[];
+}
+
+export interface ChangesSummary {
+  total: number;
+  open: number;
+  open_ncrs: number;
+  max_days_open: number;
+  pending_vo_value: string;
+  approved_vo_value: string;
 }
 
 export interface EvidenceItem {
@@ -120,5 +147,10 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ activity_id: activityId, message, history }),
       }),
+  },
+
+  changes: {
+    list: () => request<ChangeItem[]>("/changes"),
+    summary: () => request<ChangesSummary>("/changes/summary"),
   },
 };

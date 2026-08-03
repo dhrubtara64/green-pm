@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const [filterFlag, setFilterFlag] = useState<string>("All");
   const [recomputing, setRecomputing] = useState(false);
 
-  const disciplines = ["All", ...Array.from(new Set(activities.map(a => a.discipline).filter(Boolean))) as string[]];
+  const disciplines = ["All", "Civil", "Mechanical", "Piping", "Electrical", "I&C", "Commissioning"];
 
   async function load() {
     try {
@@ -62,11 +62,15 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto">
-      <div className="flex items-start justify-between mb-6">
+      {/* Project header */}
+      <div className="flex items-start justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Project Progress</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Evidence-backed status sourced from your schedule and project documents
+          <p className="text-slate-500 text-sm mt-0.5">
+            Bellary CCGT Power Project · 900 MW · BPL-CCG-2024
+          </p>
+          <p className="text-slate-400 text-xs mt-0.5">
+            Evidence-backed status sourced from Primavera P6 and Aconex document vault
           </p>
         </div>
         <button
@@ -80,65 +84,71 @@ export default function DashboardPage() {
         </button>
       </div>
 
+      {/* Monsoon Advisory */}
+      <div className="mb-4 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+        <span className="font-semibold">⛈ Monsoon Advisory — 30 Jul:</span>{" "}
+        Heavy rain forecast from 14:00 (IMD Bellary). All outdoor concrete pours (WBS 1.3) must complete before 13:00.
+        Site drainage pumps activated at HRSG plinth and transformer bay.
+      </div>
+
+      {/* Site conditions strip */}
+      <div className="flex gap-3 mb-5 overflow-x-auto pb-1">
+        <SiteChip icon="🌤" label="34°C · Partly Cloudy" sub="Bellary" />
+        <SiteChip icon="💨" label="22 km/h NW" sub="Crane ops permitted" />
+        <SiteChip icon="🌧" label="Rain 14:00 today" sub="Heavy — outdoor works at risk" warn />
+        <SiteChip icon="🏗" label="HRSG Plinth" sub="Waterlogged — Jul 28 rains" warn />
+        <SiteChip icon="🚧" label="NH-67 Diversion" sub="Near main gate — allow +20 min" />
+      </div>
+
+      {/* KPI summary chips */}
       {!loading && (
-        <div className="flex flex-wrap gap-3 mb-6">
-          <SummaryChip
-            label="Total Activities"
-            value={activities.length}
-            color="text-slate-700 bg-white border-slate-200"
-          />
-          <SummaryChip
-            label="Verification Required"
-            value={verificationCount}
-            color={verificationCount > 0 ? "text-red-600 bg-red-50 border-red-200" : "text-slate-500 bg-white border-slate-200"}
-          />
-          <SummaryChip
-            label="Low Confidence (<50%)"
-            value={lowConfCount}
-            color={lowConfCount > 0 ? "text-amber-700 bg-amber-50 border-amber-200" : "text-slate-500 bg-white border-slate-200"}
-          />
-          <SummaryChip
-            label="Evidence/Confidence Divergence"
-            value={divergentCount}
-            color={divergentCount > 0 ? "text-sky-700 bg-sky-50 border-sky-200" : "text-slate-500 bg-white border-slate-200"}
-          />
+        <div className="flex flex-wrap gap-3 mb-5">
+          <SummaryChip label="Total Activities" value={activities.length}
+            color="text-slate-700 bg-white border-slate-200" />
+          <SummaryChip label="Verification Required" value={verificationCount}
+            color={verificationCount > 0 ? "text-red-600 bg-red-50 border-red-200" : "text-slate-500 bg-white border-slate-200"} />
+          <SummaryChip label="Low Confidence" value={lowConfCount}
+            color={lowConfCount > 0 ? "text-amber-700 bg-amber-50 border-amber-200" : "text-slate-500 bg-white border-slate-200"} />
+          <SummaryChip label="Ev/Conf Divergence" value={divergentCount}
+            color={divergentCount > 0 ? "text-sky-700 bg-sky-50 border-sky-200" : "text-slate-500 bg-white border-slate-200"} />
         </div>
       )}
 
       <div className="flex flex-wrap gap-3 mb-5">
+        <FilterSelect label="Discipline" value={filterDiscipline} options={disciplines} onChange={setFilterDiscipline} />
         <FilterSelect
-          label="Discipline"
-          value={filterDiscipline}
-          options={disciplines}
-          onChange={setFilterDiscipline}
-        />
-        <FilterSelect
-          label="Flag"
-          value={filterFlag}
+          label="Flag" value={filterFlag}
           options={["All", "Verification Required", "Low Confidence", "Divergent"]}
           onChange={setFilterFlag}
         />
       </div>
 
-      {loading && (
-        <div className="text-slate-500 text-sm py-12 text-center">Loading activities...</div>
-      )}
+      {loading && <div className="text-slate-500 text-sm py-12 text-center">Loading activities...</div>}
       {error && (
-        <div className="text-red-600 text-sm py-4 bg-red-50 border border-red-200 rounded-lg px-4">
-          {error}
-        </div>
+        <div className="text-red-600 text-sm py-4 bg-red-50 border border-red-200 rounded-lg px-4">{error}</div>
       )}
 
       {!loading && !error && (
         <div className="grid gap-3">
-          {filtered.map(activity => (
-            <ActivityRow key={activity.id} activity={activity} />
-          ))}
+          {filtered.map(activity => <ActivityRow key={activity.id} activity={activity} />)}
           {filtered.length === 0 && (
             <p className="text-slate-500 text-sm text-center py-8">No activities match the current filter.</p>
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function SiteChip({ icon, label, sub, warn }: { icon: string; label: string; sub: string; warn?: boolean }) {
+  return (
+    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm shrink-0
+      ${warn ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-white border-slate-200 text-slate-700"}`}>
+      <span>{icon}</span>
+      <div>
+        <div className="font-medium text-xs leading-tight">{label}</div>
+        <div className="text-xs opacity-70 leading-tight">{sub}</div>
+      </div>
     </div>
   );
 }
@@ -199,6 +209,9 @@ function ActivityRow({ activity }: { activity: ActivitySummary }) {
           <p className="text-slate-900 font-medium text-sm group-hover:text-gpm-green transition-colors">
             {activity.name}
           </p>
+          {activity.subcontractor && (
+            <p className="text-slate-400 text-xs mt-0.5">{activity.subcontractor}</p>
+          )}
           {activity.missing_evidence && (
             <p className="text-amber-600 text-xs mt-1.5 truncate">
               Missing: {activity.missing_evidence}
@@ -211,13 +224,13 @@ function ActivityRow({ activity }: { activity: ActivitySummary }) {
           <div className="text-xs text-slate-500">Reported</div>
         </div>
 
-        <div className="shrink-0 w-56">
+        <div className="shrink-0">
           <ScoreBadges
             evidenceScore={activity.evidence_score}
             confidenceScore={activity.confidence_score}
-            compact={false}
+            compact={true}
           />
-          <div className="mt-2">
+          <div className="mt-1.5">
             <DivergenceBadge
               evidenceScore={activity.evidence_score}
               confidenceScore={activity.confidence_score}

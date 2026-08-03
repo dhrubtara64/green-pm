@@ -22,3 +22,9 @@ def get_db():
 def create_tables():
     from app.models import activity, milestone, deliverable, evidence_item, human_correction, weekly_report  # noqa: F401
     Base.metadata.create_all(bind=engine)
+    # Safe migration: add columns introduced after initial deploy
+    with engine.connect() as conn:
+        conn.execute(__import__("sqlalchemy").text(
+            "ALTER TABLE activities ADD COLUMN IF NOT EXISTS subcontractor VARCHAR"
+        ))
+        conn.commit()

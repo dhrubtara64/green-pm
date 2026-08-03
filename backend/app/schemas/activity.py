@@ -9,6 +9,7 @@ class ActivitySummary(BaseModel):
     name: str
     wbs_ref: str | None
     discipline: str | None
+    subcontractor: str | None
     reported_progress: float
     evidence_score: float
     confidence_score: float

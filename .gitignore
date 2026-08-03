@@ -1,5 +1,9 @@
-# Secrets
+# Secrets — never commit these
 .env
+*.pem
+*.key
+service-account-key.json
+key.json
 
 # Python
 __pycache__/
@@ -10,6 +14,11 @@ venv/
 *.egg-info/
 dist/
 build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
 
 # Node
 node_modules/
@@ -32,9 +41,19 @@ Thumbs.db
 
 # Docker volumes / local data
 pgdata/
+postgres_data/
+
+# Load test results
+tests/load/results/
+
+# Terraform state (use remote backend)
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.backup
+infra/terraform/.terraform/
 
 # Misc
 *.jpeg
 *.jpg
 *.png
 !public/**
+ABF1D27B-3393-4313-9487-576C5875AB6F.jpeg

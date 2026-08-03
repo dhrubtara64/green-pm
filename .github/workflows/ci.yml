@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install linters
+        run: pip install ruff mypy
+      - name: Ruff lint
+        run: |
+          ruff check services/ shared/ --ignore E501 --ignore E402 || true
+      - name: Type check (non-blocking until typed)
+        run: |
+          mypy services/ shared/ --ignore-missing-imports --no-strict-optional || true
+
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: greenpm
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: greenpm_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://greenpm:testpassword@localhost:5432/greenpm_test
+      REDIS_URL: redis://localhost:6379
+      ENVIRONMENT: test
+      TENANT_ID_OVERRIDE: ""
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install shared package
+        run: |
+          if [ -f shared/pyproject.toml ]; then
+            pip install -e shared/
+          fi
+      - name: Install test dependencies
+        run: |
+          pip install pytest pytest-asyncio httpx
+          for svc in services/*/; do
+            if [ -f "$svc/requirements.txt" ]; then
+              pip install -r "$svc/requirements.txt"
+            fi
+          done
+      - name: Run tests
+        run: |
+          if [ -d tests ] && find tests -name "test_*.py" | grep -q .; then
+            pytest tests/ -v --tb=short
+          else
+            echo "No tests yet — scaffold only. Tests will be added in Sprint 0."
+          fi

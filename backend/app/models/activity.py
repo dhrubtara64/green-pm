@@ -13,6 +13,7 @@ class Activity(Base):
     name = Column(String, nullable=False)
     wbs_ref = Column(String, nullable=True)
     discipline = Column(String, nullable=True)
+    subcontractor = Column(String, nullable=True)
     source_schedule_ref = Column(String, nullable=True)
 
     reported_progress = Column(Float, nullable=False, default=0.0)

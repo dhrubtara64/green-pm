@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "greenpm-shared"
+version = "0.1.0"
+description = "Shared models, events, and test utilities for Green PM v5 services"
+requires-python = ">=3.12"
+dependencies = [
+    "sqlalchemy[asyncio]>=2.0.35",
+    "pydantic>=2.9.2",
+    "pydantic-settings>=2.5.2",
+    "python-uuid7>=0.1.0",
+    "structlog>=24.4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["shared*"]
