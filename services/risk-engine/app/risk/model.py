@@ -16,6 +16,7 @@ class Risk(Base, TenantIsolationMixin):
     """Project risk with probability, impact, and lifecycle status."""
 
     __tablename__ = "risks"
+    __table_args__ = {"extend_existing": True}
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     project_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
@@ -32,6 +33,7 @@ class RiskAssessment(Base, TenantIsolationMixin):
     """Monte Carlo assessment snapshot for a risk."""
 
     __tablename__ = "risk_assessments"
+    __table_args__ = {"extend_existing": True}
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     risk_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
@@ -50,6 +52,7 @@ class RiskMitigation(Base, TenantIsolationMixin):
     """Mitigation action tracked against a risk."""
 
     __tablename__ = "risk_mitigations"
+    __table_args__ = {"extend_existing": True}
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     risk_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
@@ -69,6 +72,7 @@ class MemoryPattern(Base, TenantIsolationMixin):
     """Organisational memory pattern — stub table, expanded in Sprint 13."""
 
     __tablename__ = "memory_patterns"
+    __table_args__ = {"extend_existing": True}
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     pattern_name: Mapped[str] = mapped_column(String(300), nullable=False)
